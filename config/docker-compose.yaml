@@ -14,3 +14,12 @@ services:
      REDIS_ARGS: "--save 10 1"
    networks:
     - secure_net
+
+  flask-app:
+    build: .
+    ports:
+     - 8000:8000
+    environment:
+      FLASK_ENV: development
+    networks:
+    - secure_net
