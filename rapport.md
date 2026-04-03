@@ -54,6 +54,7 @@ Même si ce ne sont pas les workers qui contiennent l'application, ils peuvent e
 ![Logs Serveur]
 
 ### Création d’un Registre Privé
+---
 
 Pour utiliser un registre privé, on va tout d'abord créer le registre avec l'image **registry**
 
@@ -83,15 +84,16 @@ Pour finir, on va tester d'effectuer des requêtes vers le registre sur le manag
 
 ##### A quoi sert un registre privé?
 
-aaa
+Un registre privé stocke l'image Docker utilisé de manière sécurisé
 
 ##### Pourquoi est-il important dans un environnement de production?
 
-aaa
+Un registre est important en production puisqu'il assure une sécurité, pas de dépendance à un service externe
 
 ## Phase 2 : Déployer l’Application sur Swarm
 
-### Étape 1 : Initialisation de Swarm
+### Initialisation de Swarm
+---
 
 Pour déployer l'application Flask sur le cluster des 3 VMs (manager1, worker1 et worker2), on doit tout d'abord initialiser Docker Swarm
 ```bash
@@ -114,7 +116,8 @@ Dans le manager, on peut consulter les noeuds présents dans le cluster (nos wor
 
 On y voit le worker (1ère ligne) présent dans le cluster et notre manager (2ème ligne)
 
-### Étape 2 : Mettre en place un réseau overlay et une volume pour Redis
+### Mettre en place un réseau overlay et une volume pour Redis
+---
 
 Pour continuer, on va maintenant créer un réseau overlay qui sera utilisé lors du déploiement du service Redis.
 
@@ -133,13 +136,14 @@ On va également mettre en place un volume pour avoir une persistance des donné
 
 ##### Pourquoi est-il important d’utiliser un réseau overlay pour les services de l’application?
 
-aaa
+Un réseau overlay permet de faire communiquer les différents services de l'application présents dans le cluster
 
 ##### Quels sont les avantages par rapport à un réseau bridge?
 
-aaa
+Un réseau overlay fonctionne sur un cluster contrairement à un réseau bridge
 
-### Étape 3 : Déployer l’Application sur Swarm
+### Déployer l’Application sur Swarm
+---
 
 Maintenant que tous les outils nécessaires ont été mis en place, on va pouvoir déployer l'application sur Swarm.
 
@@ -181,29 +185,28 @@ Pour vérifier qu'on arrive à utiliser l'application après le déploiement, on
 ![POST Application scale]
 
 
+[Ip serveur redis]: images/phase1/etape2/ip_redis.png
+[Image Docker Flask]: images/phase1/etape2/image_web_api_app.png
+[Résultat curl manager1]: images/phase1/etape2/curl_post_manager1.png
+[Résultat curl worker1]: images/phase1/etape2/curl_post_worker1.png
+[Résultat curl worker2]: images/phase1/etape2/curl_post_worker2.png
+[Logs Serveur]: images/phase1/etape2/logs_server_web_api_application.png
 
-[Ip serveur redis]: images/p1/e2/ip_redis.png
-[Image Docker Flask]: images/p1/e2/image_web_api_app.png
-[Résultat curl manager1]: images/p1/e2/curl_post_manager1.png
-[Résultat curl worker1]: images/p1/e2/curl_post_worker1.png
-[Résultat curl worker2]: images/p1/e2/curl_post_worker2.png
-[Logs Serveur]: images/p1/e2/logs_server_web_api_application.png
+[Résultat curl manager1 avec le registre]: images/phase1/etape3/curl_post_manager1.png
+[Résultat curl worker avec le registre]: images/phase1/etape3/curl_post_worker1.png
 
-[Résultat curl manager1 avec le registre]: images/p1/e3/curl_post_manager1.png
-[Résultat curl worker avec le registre]: images/p1/e3/curl_post_worker1.png
+[Initialisation swarm]: images/phase2/etape1/initialisation_swarm.png
+[Nouveau worker dans le cluster]: images/phase2/etape1/worker_join_swarm.png
+[Noeuds du cluster]: images/phase2/etape1/swarm_nodes.png
 
-[Initialisation swarm]: images/p2/e1/initialisation_swarm.png
-[Nouveau worker dans le cluster]: images/p2/e1/worker_join_swarm.png
-[Noeuds du cluster]: images/p2/e1/swarm_nodes.png
+[Réseau secure_net]: images/phase2/etape2/reseau_overlay.png
+[Volume redis_data]: images/phase2/etape2/volume_redis.png
 
-[Réseau secure_net]: images/p2/e2/reseau_overlay.png
-[Volume redis_data]: images/p2/e2/volume_redis.png
-
-[Déploiement de Redis sur swarm]: images/p2/e3/deploiement_redis_swarm.png
-[Noeud du service Redis]: images/p2/e3/noeud_service_redis.png
-[Test de la connexion avec Redis]: images/p2/e3/ping_redis.png
-[Service flask-app]: images/p2/e3/service_flask_app.png
-[Networks des services]: images/p2/e3/network_services.png
-[Noeud du service flask-app]: images/p2/e3/node_flask_app.png
-[Noeuds après avoir scale]: images/p2/e3/flask_app_scale.png
-[POST Application scale]: images/p2/e3/curl_app_scale.png
+[Déploiement de Redis sur swarm]: images/phase2/etape3/deploiement_redis_swarm.png
+[Noeud du service Redis]: images/phase2/etape3/noeud_service_redis.png
+[Test de la connexion avec Redis]: images/phase2/etape3/ping_redis.png
+[Service flask-app]: images/phase2/etape3/service_flask_app.png
+[Networks des services]: images/phase2/etape3/network_services.png
+[Noeud du service flask-app]: images/phase2/etape3/node_flask_app.png
+[Noeuds après avoir scale]: images/phase2/etape3/flask_app_scale.png
+[POST Application scale]: images/phase2/etape3/curl_app_scale.png
