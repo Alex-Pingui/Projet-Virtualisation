@@ -1,0 +1,16 @@
+version: '3'
+
+networks:
+  secure_net:
+   driver: overlay
+   attachable: true
+
+services:
+  redis-service:
+   image: redis:latest
+   volumes:
+    - ./redis_data:/data
+   environment:
+     REDIS_ARGS: "--save 10 1"
+   networks:
+    - secure_net

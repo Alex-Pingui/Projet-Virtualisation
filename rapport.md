@@ -55,9 +55,131 @@ Même si ce ne sont pas les workers qui contiennent l'application, ils peuvent e
 
 ### Création d’un Registre Privé
 
-Pour utiliser un registre privé, on va tout d'abord créer un container avec l'image **registry**
+Pour utiliser un registre privé, on va tout d'abord créer le registre avec l'image **registry**
 
-Etat fin seance 1: l'app a été push sur le registre: prochaine cmd: curl http://<manager1-ip>:5000/v2/_catalog
+```bash
+docker run -d -p 5000:5000 --restart=always --name registry registry:2
+```
+
+Puis, pour utiliser le registre, on va pousser l'application sur le registre qui vient d'être crée
+
+```bash
+docker tag web_api_application 172.16.1.204:5000/web_api_application
+docker push 172.16.1.204:5000/web_api_application
+```
+
+Pour finir, on va tester d'effectuer des requêtes vers le registre sur le manager1 et sur les workers
+
+**Résultat sur le manager1**
+
+![Résultat curl manager1 avec le registre]
+
+**Résultat sur un worker**
+
+![Résultat curl worker avec le registre]
+
+#### Questions
+---
+
+##### A quoi sert un registre privé?
+
+aaa
+
+##### Pourquoi est-il important dans un environnement de production?
+
+aaa
+
+## Phase 2 : Déployer l’Application sur Swarm
+
+### Étape 1 : Initialisation de Swarm
+
+Pour déployer l'application Flask sur le cluster des 3 VMs (manager1, worker1 et worker2), on doit tout d'abord initialiser Docker Swarm
+```bash
+docker swarm init --advertise-addr 172.16.1.204
+```
+
+**Résultat de l'initialisation de swarm**
+
+![Initialisation swarm]
+
+Après avoir initialisé swarm sur notre manager, on doit faire en sorte que les workers rejoignent le cluster avec le token donné à l'initialisation et l'adresse du manager gràce à la commande donnée après l'initialisation
+
+**Sur un des workers**
+
+![Nouveau worker dans le cluster]
+
+Dans le manager, on peut consulter les noeuds présents dans le cluster (nos workers) gràce à la commande suivante
+
+![Noeuds du cluster]
+
+On y voit le worker (1ère ligne) présent dans le cluster et notre manager (2ème ligne)
+
+### Étape 2 : Mettre en place un réseau overlay et une volume pour Redis
+
+Pour continuer, on va maintenant créer un réseau overlay qui sera utilisé lors du déploiement du service Redis.
+
+**Création du réseau overlay**
+
+![Réseau secure_net]
+
+On va également mettre en place un volume pour avoir une persistance des données
+
+**Création du volume**
+
+![Volume redis_data]
+
+#### Questions
+---
+
+##### Pourquoi est-il important d’utiliser un réseau overlay pour les services de l’application?
+
+aaa
+
+##### Quels sont les avantages par rapport à un réseau bridge?
+
+aaa
+
+### Étape 3 : Déployer l’Application sur Swarm
+
+Maintenant que tous les outils nécessaires ont été mis en place, on va pouvoir déployer l'application sur Swarm.
+
+On va commencer tout d'abord par déployer Redis en créant un service avec le réseau overlay créé précédemment et le volume également créé précédemment
+
+![Déploiement de Redis sur swarm]
+
+On peut voir ci-dessous sur quel noeud a été déployée Redis.
+
+![Noeud du service Redis]
+
+Et on peut tester la connexion avec redis grâce à un ping
+
+![Test de la connexion avec Redis]
+
+Redis a été déployé, on va maintenant déployer notre application Flask. Dans un premier temps, on va créer le service qui va contenir l'application avec le même réseau overlay utilisé sur le service Redis
+
+![Service flask-app]
+
+Le réseau utilisé par les services Redis et celui de l'application Flask est le même et on peut le vérifier ci-dessous
+
+![Networks des services]
+
+On peut de la même façon que pour le service Redis savoir sur quel noeud l'application Flask a été déployée
+
+![Noeud du service flask-app]
+
+Pour finir, on va maintenant scaler l'application grâce à cette commande:
+```bash
+docker service scale flask-app=3
+```
+
+On peut vérifier que l'application a bien été scaler
+
+![Noeuds après avoir scale]
+
+Pour vérifier qu'on arrive à utiliser l'application après le déploiement, on peut effectuer des requêtes HTTP tel qu'un POST comme celui ci-dessous sur le manager et sur les workers.
+
+![POST Application scale]
+
 
 
 [Ip serveur redis]: images/p1/e2/ip_redis.png
@@ -66,3 +188,22 @@ Etat fin seance 1: l'app a été push sur le registre: prochaine cmd: curl http:
 [Résultat curl worker1]: images/p1/e2/curl_post_worker1.png
 [Résultat curl worker2]: images/p1/e2/curl_post_worker2.png
 [Logs Serveur]: images/p1/e2/logs_server_web_api_application.png
+
+[Résultat curl manager1 avec le registre]: images/p1/e3/curl_post_manager1.png
+[Résultat curl worker avec le registre]: images/p1/e3/curl_post_worker1.png
+
+[Initialisation swarm]: images/p2/e1/initialisation_swarm.png
+[Nouveau worker dans le cluster]: images/p2/e1/worker_join_swarm.png
+[Noeuds du cluster]: images/p2/e1/swarm_nodes.png
+
+[Réseau secure_net]: images/p2/e2/reseau_overlay.png
+[Volume redis_data]: images/p2/e2/volume_redis.png
+
+[Déploiement de Redis sur swarm]: images/p2/e3/deploiement_redis_swarm.png
+[Noeud du service Redis]: images/p2/e3/noeud_service_redis.png
+[Test de la connexion avec Redis]: images/p2/e3/ping_redis.png
+[Service flask-app]: images/p2/e3/service_flask_app.png
+[Networks des services]: images/p2/e3/network_services.png
+[Noeud du service flask-app]: images/p2/e3/node_flask_app.png
+[Noeuds après avoir scale]: images/p2/e3/flask_app_scale.png
+[POST Application scale]: images/p2/e3/curl_app_scale.png
